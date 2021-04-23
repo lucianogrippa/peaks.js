@@ -340,7 +340,7 @@ define([
 
     if (scale < this._originalWaveformData.scale) {
       // eslint-disable-next-line max-len
-      //this._peaks.logger('peaks.zoomview.setZoom(): zoom level must be at least ' + this._originalWaveformData.scale);
+      // this._peaks.logger('peaks.zoomview.setZoom(): zoom level must be at least ' + this._originalWaveformData.scale);
       scale = this._originalWaveformData.scale;
     }
 
@@ -546,7 +546,7 @@ define([
 
   WaveformZoomView.prototype._updateWaveform = function(frameOffset) {
     var upperLimit = 0;
-    
+
     this._axis.setTimeLabelOffset(this._timeLabelOffset);
     if (this._pixelLength < this._width) {
       // Total waveform is shorter than viewport, so reset the offset to 0.

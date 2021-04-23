@@ -395,7 +395,7 @@ define([
   };
 
   WaveformOverview.prototype.formatTime = function(time) {
-    return Utils.formatTime(time, this._timeLabelPrecision,this._timeLabelOffset);
+    return Utils.formatTime(time, this._timeLabelPrecision, this._timeLabelOffset);
   };
 
   WaveformOverview.prototype.enableAutoScroll = function() {

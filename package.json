@@ -32,12 +32,11 @@
     "node": ">= 8.11.2"
   },
   "scripts": {
-    "install": "npm install -g browserify deamdify exorcist derequire",
-    "prebuild": "npm run lint",
-    "build": "browserify -d -e ./src/main.js -t deamdify -s peaks | exorcist peaks.js.map | derequire - > peaks.js",
-    "postbuild": "copyfiles peaks.js peaks.js.map demo",
+    "build": "set NODE_ENV=development && webpack",
+    "build:prod": "set NODE_ENV=production && webpack",
+    "postbuild": "copyfiles peaks.js peaks.js.map demo && copyfiles peaks.js peaks.js.map peaks.js.d.ts build",
     "doc": "jsdoc --private --destination docs --recurse src",
-    "lint": "npx eslint src/*.js test/**/*.js test/*.js karma.conf.js",
+    "lint": "eslint --fix src/*.js test/**/*.js test/*.js karma.conf.js",
     "pretest": "npm run build",
     "test": "karma start",
     "test-watch": "npm test -- --auto-watch --no-single-run",
@@ -71,7 +70,9 @@
     "serve": "~11.3.2",
     "sinon": "~9.2.4",
     "sinon-chai": "~3.5.0",
-    "watchify": "~4.0.0"
+    "watchify": "~4.0.0",
+    "webpack": "^5.35.0",
+    "webpack-cli": "^4.6.0"
   },
   "dependencies": {
     "colors.css": "~3.0.0",

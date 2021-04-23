@@ -160,7 +160,7 @@ define([
       context.stroke();
 
       // precision = 0, drops the fractional seconds
-      var label = this._timeLabelOffset ? Utils.formatTime(this._timeLabelOffset + secs, 0) : 
+      var label = this._timeLabelOffset ? Utils.formatTime(this._timeLabelOffset + secs, 0) :
                   Utils.formatTime(secs, 0);
       // var label      = Utils.formatTime(secs, 0);
       var labelWidth = context.measureText(label).width;

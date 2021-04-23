@@ -33,17 +33,14 @@ define(function() {
 
     return number;
   }
-
   return {
     /**
      * Returns a formatted time string.
-     *
      * @param {Number} time The time to be formatted, in seconds.
      * @param {Number} precision Decimal places to which time is displayed
-     * @returns {String} 
+     * @returns {String}
      */
     formatTime: function(time, precision, offset) {
-
       if (!offset) {
         offset = 0;
       }
