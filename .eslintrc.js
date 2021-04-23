@@ -20,7 +20,7 @@ module.exports = {
     "indent": ["off", 2],
     "key-spacing": ["error", { "beforeColon": false, "afterColon": true, "mode": "minimum" }],
     "keyword-spacing": ["error", { "before": true }],
-    "linebreak-style": ["error", "unix"],
+    "linebreak-style": ["error", "windows"],
     "max-len": ["warn", 100],
     "new-cap": "error",
     "newline-after-var": ["error", "always"],
