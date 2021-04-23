@@ -5,7 +5,6 @@
  *
  * @module waveform-zoomview
  */
-
 define([
   './mouse-drag-handler',
   './playhead-layer',
