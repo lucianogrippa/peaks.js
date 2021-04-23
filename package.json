@@ -33,7 +33,7 @@
   },
   "scripts": {
     "install": "npm install",
-    "prebuild": "npm run lint",
+    "prebuild": "npm install && npm run lint",
     "build": "browserify -d -e ./src/main.js -t deamdify -s peaks | exorcist peaks.js.map | derequire - > peaks.js",
     "postbuild": "copyfiles peaks.js peaks.js.map demo",
     "doc": "jsdoc --private --destination docs --recurse src",
