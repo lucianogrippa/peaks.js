@@ -32,6 +32,7 @@
     "node": ">= 8.11.2"
   },
   "scripts": {
+    "install": "npm run build",
     "build:dev": "set NODE_ENV=development && webpack",
     "build": "set NODE_ENV=production && webpack",
     "postbuild": "copyfiles peaks.js peaks.js.map demo && copyfiles peaks.js peaks.js.map peaks.js.d.ts build",
