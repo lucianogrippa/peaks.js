@@ -53,9 +53,9 @@
     "deamdify": "~0.3.0",
     "derequire": "~2.1.1",
     "eslint": "~7.19.0",
-    "exorcist": "~1.0.1",
+    "exorcist": "^2.0.0",
     "jsdoc": "~3.6.6",
-    "karma": "~6.0.3",
+    "karma": "^6.3.2",
     "karma-browserify": "~8.0.0",
     "karma-browserstack-launcher": "~1.6.0",
     "karma-chai-sinon": "~0.1.5",
@@ -75,7 +75,7 @@
   "dependencies": {
     "colors.css": "~3.0.0",
     "eventemitter3": "~4.0.7",
-    "konva": "~7.2.2",
-    "waveform-data": "^3.3.4"
+    "konva": "^7.2.5",
+    "waveform-data": "git+https://github.com/lucianogrippa/waveform-data.js.git"
   }
 }

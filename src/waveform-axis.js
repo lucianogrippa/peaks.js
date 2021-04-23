@@ -5,7 +5,6 @@
  *
  * @module waveform-axis
  */
-
 define([
   './utils',
   'konva'
@@ -26,12 +25,13 @@ define([
    * @param {Number} options.axisLabelFontSize
    * @param {String} options.axisLabelFontStyle
    */
-
   function WaveformAxis(view, options) {
     var self = this;
 
     self._axisGridlineColor = options.axisGridlineColor;
-    self._axisLabelColor    = options.axisLabelColor;
+    self._axisLabelColor = options.axisLabelColor;
+    // option need to set time offset
+    self._timeLabelOffset = options.timeLabelOffset;
 
     self._axisLabelFont = WaveformAxis._buildFontString(
       options.axisLabelFontFamily,
@@ -45,6 +45,10 @@ define([
       }
     });
   }
+
+  WaveformAxis.prototype.setTimeLabelOffset = function(timeOffset) {
+    this._timeLabelOffset = timeOffset;
+  };
 
   WaveformAxis._buildFontString = function(fontFamily, fontSize, fontStyle) {
     if (!fontSize) {
@@ -76,16 +80,15 @@ define([
    * @param {WaveformOverview|WaveformZoomView} view
    * @returns {Number}
    */
-
   WaveformAxis.prototype.getAxisLabelScale = function(view) {
-    var baseSecs   = 1; // seconds
-    var steps      = [1, 2, 5, 10, 20, 30];
+    var baseSecs = 1; // seconds
+    var steps = [1, 2, 5, 10, 20, 30];
     var minSpacing = 60;
-    var index      = 0;
+    var index = 0;
 
     var secs;
 
-    for (;;) {
+    for (; ;) {
       secs = baseSecs * steps[index];
       var pixels = view.timeToPixels(secs);
 
@@ -109,7 +112,6 @@ define([
    * @param {Konva.Context} context The context to draw on.
    * @param {WaveformOverview|WaveformZoomView} view
    */
-
   WaveformAxis.prototype.drawAxis = function(context, view) {
     var currentFrameStartTime = view.pixelsToTime(view.getFrameOffset());
 
@@ -140,10 +142,10 @@ define([
     var secs = firstAxisLabelSecs;
     var x;
 
-    var width  = view.getWidth();
+    var width = view.getWidth();
     var height = view.getHeight();
 
-    for (;;) {
+    for (; ;) {
       // Position of axis marker (pixels)
       x = axisLabelOffsetPixels + view.timeToPixels(secs - firstAxisLabelSecs);
       if (x >= width) {
@@ -158,10 +160,12 @@ define([
       context.stroke();
 
       // precision = 0, drops the fractional seconds
-      var label      = Utils.formatTime(secs, 0);
+      var label = this._timeLabelOffset ? Utils.formatTime(this._timeLabelOffset + secs, 0) : 
+                  Utils.formatTime(secs, 0);
+      // var label      = Utils.formatTime(secs, 0);
       var labelWidth = context.measureText(label).width;
-      var labelX     = x - labelWidth / 2;
-      var labelY     = height - 1 - markerHeight;
+      var labelX = x - labelWidth / 2;
+      var labelY = height - 1 - markerHeight;
 
       if (labelX >= 0) {
         context.fillText(label, labelX, labelY);

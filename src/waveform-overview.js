@@ -62,6 +62,7 @@ define([
 
     self._amplitudeScale = 1.0;
     self._timeLabelPrecision = peaks.options.timeLabelPrecision;
+    self._timeLabelOffset = peaks.options.timeLabelOffset;
 
     self._options = peaks.options;
 
@@ -341,9 +342,11 @@ define([
       axisLabelColor:      this._options.axisLabelColor,
       axisLabelFontFamily: this._options.fontFamily,
       axisLabelFontSize:   this._options.fontSize,
-      axisLabelFontStyle:  this._options.fontStyle
+      axisLabelFontStyle:  this._options.fontStyle,
+      timeLabelOffset:     this._timeLabelOffset
     });
 
+    this._axis.setTimeLabelOffset(this._timeLabelOffset);
     this._axis.addToLayer(this._axisLayer);
     this._stage.add(this._axisLayer);
   };
@@ -353,6 +356,8 @@ define([
   };
 
   WaveformOverview.prototype._updateWaveform = function() {
+    this._axis.setTimeLabelOffset(this._timeLabelOffset);
+
     this._waveformLayer.draw();
     this._axisLayer.draw();
 
@@ -383,8 +388,14 @@ define([
     this._playheadLayer.updatePlayheadText();
   };
 
+  WaveformOverview.prototype.setTimeLabelOffset = function(offset) {
+    this._axis.setTimeLabelOffset(offset);
+    this._timeLabelOffset = offset;
+    this._playheadLayer.updatePlayheadText();
+  };
+
   WaveformOverview.prototype.formatTime = function(time) {
-    return Utils.formatTime(time, this._timeLabelPrecision);
+    return Utils.formatTime(time, this._timeLabelPrecision,this._timeLabelOffset);
   };
 
   WaveformOverview.prototype.enableAutoScroll = function() {

@@ -71,6 +71,7 @@ define([
     self._enableAutoScroll = true;
     self._amplitudeScale = 1.0;
     self._timeLabelPrecision = peaks.options.timeLabelPrecision;
+    self._timeLabelOffset = peaks.options.timeLabelOffset;
 
     self._options = peaks.options;
 
@@ -340,7 +341,7 @@ define([
 
     if (scale < this._originalWaveformData.scale) {
       // eslint-disable-next-line max-len
-      this._peaks.logger('peaks.zoomview.setZoom(): zoom level must be at least ' + this._originalWaveformData.scale);
+      //this._peaks.logger('peaks.zoomview.setZoom(): zoom level must be at least ' + this._originalWaveformData.scale);
       scale = this._originalWaveformData.scale;
     }
 
@@ -530,9 +531,10 @@ define([
       axisLabelColor:      this._options.axisLabelColor,
       axisLabelFontFamily: this._options.fontFamily,
       axisLabelFontSize:   this._options.fontSize,
-      axisLabelFontStyle:  this._options.fontStyle
+      axisLabelFontStyle:  this._options.fontStyle,
+      timeLabelOffset:     this._timeLabelOffset
     });
-
+    this._axis.setTimeLabelOffset(this._timeLabelOffset);
     this._axis.addToLayer(this._axisLayer);
     this._stage.add(this._axisLayer);
   };
@@ -544,8 +546,9 @@ define([
    */
 
   WaveformZoomView.prototype._updateWaveform = function(frameOffset) {
-    var upperLimit;
-
+    var upperLimit = 0;
+    
+    this._axis.setTimeLabelOffset(this._timeLabelOffset);
     if (this._pixelLength < this._width) {
       // Total waveform is shorter than viewport, so reset the offset to 0.
       frameOffset = 0;
@@ -591,8 +594,14 @@ define([
     this._playheadLayer.updatePlayheadText();
   };
 
+  WaveformZoomView.prototype.setTimeLabelOffset = function(offset) {
+    this._axis.setTimeLabelOffset(offset);
+    this._timeLabelOffset = offset;
+    this._playheadLayer.updatePlayheadText();
+  };
+
   WaveformZoomView.prototype.formatTime = function(time) {
-    return Utils.formatTime(time, this._timeLabelPrecision);
+    return Utils.formatTime(time, this._timeLabelPrecision, this._timeLabelOffset);
   };
 
   WaveformZoomView.prototype.enableAutoScroll = function(enable) {

@@ -5,7 +5,6 @@
  *
  * @module utils
  */
-
 define(function() {
   'use strict';
 
@@ -36,16 +35,21 @@ define(function() {
   }
 
   return {
-
     /**
      * Returns a formatted time string.
      *
      * @param {Number} time The time to be formatted, in seconds.
      * @param {Number} precision Decimal places to which time is displayed
-     * @returns {String}
+     * @returns {String} 
      */
+    formatTime: function(time, precision, offset) {
 
-    formatTime: function(time, precision) {
+      if (!offset) {
+        offset = 0;
+      }
+
+      time += offset;
+
       var result = [];
 
       var fractionSeconds = Math.floor((time % 1) * Math.pow(10, precision));
@@ -83,9 +87,7 @@ define(function() {
      * roundUpToNearest(5.5, 3); // returns 6
      * roundUpToNearest(141.0, 10); // returns 150
      * roundUpToNearest(-5.5, 3); // returns -6
-     */
-
-    roundUpToNearest: function(value, multiple) {
+     */roundUpToNearest: function(value, multiple) {
       if (multiple === 0) {
         return 0;
       }
@@ -130,7 +132,6 @@ define(function() {
      * @param {Array<Number>} array The array to test
      * @returns {Boolean}
      */
-
     isInAscendingOrder: function(array) {
       if (array.length === 0) {
         return true;
@@ -155,7 +156,6 @@ define(function() {
      * @param {Number} value The value to test
      * @returns {Boolean}
      */
-
     isNumber: function(value) {
       return typeof value === 'number';
     },
@@ -166,7 +166,6 @@ define(function() {
      * @param {Number} value The value to test
      * @returns {Boolean}
      */
-
     isValidTime: function(value) {
       return (typeof value === 'number') && Number.isFinite(value);
     },
@@ -177,7 +176,6 @@ define(function() {
      * @param {Object|Array} value The value to test
      * @returns {Boolean}
      */
-
     isObject: function(value) {
       return (value !== null) && (typeof value === 'object')
         && !Array.isArray(value);
@@ -189,7 +187,6 @@ define(function() {
      * @param {String} value The value to test
      * @returns {Boolean}
      */
-
     isString: function(value) {
       return typeof value === 'string';
     },
@@ -200,7 +197,6 @@ define(function() {
      * @param {ArrayBuffer} value The value to test
      * @returns {Boolean}
      */
-
     isArrayBuffer: function(value) {
       return Object.prototype.toString.call(value).includes('ArrayBuffer');
     },
@@ -211,7 +207,6 @@ define(function() {
      * @param {Object} value The value to test
      * @returns {Boolean}
      */
-
     isNullOrUndefined: function(value) {
       return value === undefined || value === null;
     },
@@ -222,7 +217,6 @@ define(function() {
      * @param {Function} value The value to test
      * @returns {Boolean}
      */
-
     isFunction: function(value) {
       return typeof value === 'function';
     },
@@ -233,7 +227,6 @@ define(function() {
      * @param {Function} value The value to test
      * @returns {Boolean}
      */
-
     isBoolean: function(value) {
       return value === true || value === false;
     },
@@ -244,7 +237,6 @@ define(function() {
      * @param {HTMLElement} value The value to test
      * @returns {Boolean}
      */
-
     isHTMLElement: function(value) {
       return value instanceof HTMLElement;
     },
@@ -254,7 +246,6 @@ define(function() {
      * @param {Function} value The value to test
      * @returns {Boolean}
      */
-
     isArray: function(value) {
       return Array.isArray(value);
     },
@@ -264,16 +255,15 @@ define(function() {
      * @param {Function} value The value to test
      * @returns {Boolean}
      */
-
     isLinearGradientColor: function(value) {
       return this.isObject(value) &&
-              this.objectHasProperty(value, 'linearGradientStart') &&
-              this.objectHasProperty(value, 'linearGradientEnd') &&
-              this.objectHasProperty(value, 'linearGradientColorStops') &&
-              this.isNumber(value.linearGradientStart) &&
-              this.isNumber(value.linearGradientEnd) &&
-              this.isArray(value.linearGradientColorStops) &&
-              value.linearGradientColorStops.length === 2;
+        this.objectHasProperty(value, 'linearGradientStart') &&
+        this.objectHasProperty(value, 'linearGradientEnd') &&
+        this.objectHasProperty(value, 'linearGradientColorStops') &&
+        this.isNumber(value.linearGradientStart) &&
+        this.isNumber(value.linearGradientEnd) &&
+        this.isArray(value.linearGradientColorStops) &&
+        value.linearGradientColorStops.length === 2;
     },
 
     objectHasProperty: function(object, field) {

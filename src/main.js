@@ -210,6 +210,10 @@ define([
       timeLabelPrecision: 2,
 
       /**
+       * Offset for time label , only text format is affected
+       */
+      timeLabelOffset: 0,
+      /**
        * Show current time position by the play head marker
        * (zoom view only)
        */
