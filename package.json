@@ -1,6 +1,6 @@
 {
   "name": "peaks.js",
-  "version": "0.23.1",
+  "version": "0.23.22-LUC",
   "description": "JavaScript UI component for displaying audio waveforms",
   "main": "./peaks.js",
   "types": "./peaks.js.d.ts",
@@ -32,9 +32,9 @@
     "node": ">= 8.11.2"
   },
   "scripts": {
-    "install": "npm run build",
     "build:dev": "set NODE_ENV=development && webpack",
     "build": "set NODE_ENV=production && webpack",
+    "build:demo": "set NODE_ENV=development && webpack && copyfiles peaks.js.d.ts peaks.js peaks.js.map ../videocutaudio-editor/editor-source/angular-audioeditor/libs/peaks.js/",
     "postbuild": "copyfiles peaks.js peaks.js.map demo && copyfiles peaks.js peaks.js.map peaks.js.d.ts build",
     "doc": "jsdoc --private --destination docs --recurse src",
     "lint": "eslint --fix src/*.js test/**/*.js test/*.js karma.conf.js",
