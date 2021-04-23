@@ -32,8 +32,8 @@
     "node": ">= 8.11.2"
   },
   "scripts": {
-    "build": "set NODE_ENV=development && webpack",
-    "build:prod": "set NODE_ENV=production && webpack",
+    "build:dev": "set NODE_ENV=development && webpack",
+    "build": "set NODE_ENV=production && webpack",
     "postbuild": "copyfiles peaks.js peaks.js.map demo && copyfiles peaks.js peaks.js.map peaks.js.d.ts build",
     "doc": "jsdoc --private --destination docs --recurse src",
     "lint": "eslint --fix src/*.js test/**/*.js test/*.js karma.conf.js",
