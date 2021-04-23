@@ -202,6 +202,8 @@ declare module 'peaks.js' {
     playheadTextColor?: string;
     /** Precision of time label for play head and point/segment markers */
     timeLabelPrecision?: number;
+    /** offset for label of play head and axis */
+    timeLabelOffset?: number;
     /**
      * Show current time next to the play head
      * - (zoom view only)
@@ -306,6 +308,7 @@ declare module 'peaks.js' {
     'player.error': (error: any) => void;
     'player.pause': (time: number) => void;
     'player.play': (time: number) => void;
+    'player.playing': (time: number) => void;
     'player.seeked': (time: number) => void;
     'player.timeupdate': (time: number) => void;
   }
