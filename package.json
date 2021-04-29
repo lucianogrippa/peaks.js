@@ -32,18 +32,18 @@
     "node": ">= 8.11.2"
   },
   "scripts": {
-    "build:dev": "set NODE_ENV=development && webpack",
+    "build:dev": "set NODE_ENV=development && webpack && npm run postbuild",
     "build": "set NODE_ENV=production && webpack",
-    "build:demo": "set NODE_ENV=development && webpack && copyfiles peaks.js.d.ts peaks.js peaks.js.map ../videocutaudio-editor/editor-source/angular-audioeditor/libs/peaks.js/",
-    "postbuild": "copyfiles peaks.js peaks.js.map demo && copyfiles peaks.js peaks.js.map peaks.js.d.ts build",
+    "build:demo": "set NODE_ENV=development && webpack && npm run postbuild",
+    "postbuild": "copyfiles peaks.js.d.ts ./build/peaks.js ./build/peaks.js.map ./demo &&  copyfiles  peaks.js.d.ts ./build/peaks.js ./build/peaks.js.map ../videocutaudio-editor/editor-source/angular-audioeditor/libs/peaks.js/",
     "doc": "jsdoc --private --destination docs --recurse src",
     "lint": "eslint --fix src/*.js test/**/*.js test/*.js karma.conf.js",
     "pretest": "npm run build",
     "test": "karma start",
     "test-watch": "npm test -- --auto-watch --no-single-run",
     "copy-demo-files": "copyfiles test_data/sample.mp3 test_data/07023003.mp3 test_data/07023003-2channel.dat demo",
-    "prestart": "npm run build && npm run copy-demo-files",
-    "start": "serve --listen 8080 --no-clipboard demo",
+    "prestart": "npm run build:dev && npm run copy-demo-files",
+    "start": "serve --listen 8000 --no-clipboard demo",
     "prepack": "npm run build"
   },
   "devDependencies": {

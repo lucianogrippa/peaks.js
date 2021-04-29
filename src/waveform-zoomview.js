@@ -12,8 +12,8 @@ define([
   './segments-layer',
   './waveform-axis',
   './waveform-shape',
-  // './animated-zoom-adapter',
-  // './static-zoom-adapter',
+   './animated-zoom-adapter',
+  './static-zoom-adapter',
   './utils',
   'konva'
 ], function(
@@ -23,8 +23,8 @@ define([
     SegmentsLayer,
     WaveformAxis,
     WaveformShape,
-    // AnimatedZoomAdapter,
-    // StaticZoomAdapter,
+    AnimatedZoomAdapter,
+    StaticZoomAdapter,
     Utils,
     Konva) {
   'use strict';
@@ -375,9 +375,9 @@ define([
     // Update the playhead position after zooming.
     this._playheadLayer.updatePlayheadTime(currentTime);
 
-    // var adapter = this.createZoomAdapter(currentScale, previousScale);
+    var adapter = this.createZoomAdapter(currentScale, previousScale);
 
-    // adapter.start(relativePosition);
+    adapter.start(relativePosition);
 
     this._peaks.emit('zoom.update', scale, prevScale);
 
@@ -432,7 +432,7 @@ define([
     return pixels * this._data.scale / this._data.sample_rate;
   };
 
-  /* var zoomAdapterMap = {
+  var zoomAdapterMap = {
     'animated': AnimatedZoomAdapter,
     'static': StaticZoomAdapter
   };
@@ -445,7 +445,7 @@ define([
     }
 
     return ZoomAdapter.create(this, currentScale, previousScale);
-  }; */
+  };
 
   /**
    * @returns {Number} The start position of the waveform shown in the view,
@@ -543,10 +543,9 @@ define([
    *
    * @param {Number} frameOffset The new frame offset, in pixels.
    */
-
   WaveformZoomView.prototype._updateWaveform = function(frameOffset) {
     var upperLimit = 0;
-
+    console.log("frame offset ",frameOffset);
     this._axis.setTimeLabelOffset(this._timeLabelOffset);
     if (this._pixelLength < this._width) {
       // Total waveform is shorter than viewport, so reset the offset to 0.
