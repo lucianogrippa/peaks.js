@@ -179,9 +179,9 @@
       </div>
     </div>
 
-    <script src="peaks.js"></script>
+    <script src="./build/peaks.js"></script>
     <script>
-      (function(Peaks) {
+      (function() {
         var renderSegments = function(peaks) {
           var segmentsContainer = document.getElementById('segments');
           var segments = peaks.segments.getSegments();
@@ -340,7 +340,9 @@
           },
           keyboard: true,
           pointMarkerColor: '#006eb0',
-          showPlayheadTime: true
+          showPlayheadTime: true,
+          timeLabelOffset: 7200,
+          viewScrollCenter: true
         };
 
         Peaks.init(options, function(err, peaksInstance) {
@@ -564,7 +566,7 @@
             console.log('player.pause:', time);
           });
         });
-      })(peaks);
+      })();
     </script>
   </body>
 </html>

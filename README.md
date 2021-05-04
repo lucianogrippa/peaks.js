@@ -31,6 +31,7 @@ You can read more about the project and see a demo [here](https://waveform.proto
 
 # Contents
 
+- [Contents](#contents)
 - [Installation](#installation)
 - [Demos](#demos)
 - [Using Peaks.js in your own project](#using-peaksjs-in-your-own-project)
@@ -45,64 +46,78 @@ You can read more about the project and see a demo [here](https://waveform.proto
   - [Player customization](#player-customization)
 - [API](#api)
   - [Initialization](#initialization)
-    - [Peaks.init()](#peaksinitoptions-callback)
-    - [instance.setSource()](#instancesetsourceoptions-callback)
+    - [`Peaks.init(options, callback)`](#peaksinitoptions-callback)
+    - [`instance.setSource(options, callback)`](#instancesetsourceoptions-callback)
   - [Player API](#player-api)
-    - [instance.player.play()](#instanceplayerplay)
-    - [instance.player.pause()](#instanceplayerpause)
-    - [instance.player.getCurrentTime()](#instanceplayergetcurrenttime)
-    - [instance.player.getDuration()](#instanceplayergetduration)
-    - [instance.player.seek()](#instanceplayerseektime)
-    - [instance.player.playSegment()](#instanceplayerplaysegmentsegment-loop)
+    - [`instance.player.play()`](#instanceplayerplay)
+    - [`instance.player.pause()`](#instanceplayerpause)
+    - [`instance.player.getCurrentTime()`](#instanceplayergetcurrenttime)
+    - [`instance.player.getDuration()`](#instanceplayergetduration)
+    - [`instance.player.seek(time)`](#instanceplayerseektime)
+    - [`instance.player.playSegment(segment[, loop])`](#instanceplayerplaysegmentsegment-loop)
   - [Views API](#views-api)
-    - [instance.views.getView()](#instanceviewsgetviewname)
-    - [instance.views.createZoomview()](#instanceviewscreatezoomviewcontainer)
-    - [instance.views.createOverview()](#instanceviewscreateoverviewcontainer)
-    - [instance.views.destroyZoomview()](#instanceviewsdestroyzoomview)
-    - [instance.views.destroyOverview()](#instanceviewsdestroyoverview)
+    - [`instance.views.getView(name)`](#instanceviewsgetviewname)
+    - [`instance.views.createZoomview(container)`](#instanceviewscreatezoomviewcontainer)
+    - [`instance.views.createOverview(container)`](#instanceviewscreateoverviewcontainer)
+    - [`instance.views.destroyZoomview()`](#instanceviewsdestroyzoomview)
+    - [`instance.views.destroyOverview()`](#instanceviewsdestroyoverview)
   - [View API](#view-api)
-    - [view.setAmplitudeScale()](#viewsetamplitudescalescale)
-    - [view.setWaveformColor()](#viewsetwaveformcolorcolor)
-    - [view.showPlayheadTime()](#viewshowplayheadtimeshow)
-    - [view.setTimeLabelPrecision()](#viewsettimeLabelPrecisionprecision)
-    - [view.enableAutoScroll()](#viewenableautoscrollenable)
-    - [view.enableMarkerEditing()](#viewenablemarkereditingenable)
-    - [view.fitToContainer()](#viewfittocontainer)
-    - [view.setZoom()](#viewsetzoomoptions)
-    - [view.setStartTime()](#viewsetstarttimetime)
+    - [`view.setAmplitudeScale(scale)`](#viewsetamplitudescalescale)
+    - [`view.setWaveformColor(color)`](#viewsetwaveformcolorcolor)
+    - [`view.showPlayheadTime(show)`](#viewshowplayheadtimeshow)
+    - [`view.setTimeLabelPrecision(precision)`](#viewsettimelabelprecisionprecision)
+    - [`view.setTimeLabelOffset(time)`](#viewsettimelabeloffsettime)
+    - [`view.enableAutoScroll(enable)`](#viewenableautoscrollenable)
+    - [`view.enableMarkerEditing(enable)`](#viewenablemarkereditingenable)
+    - [`view.fitToContainer()`](#viewfittocontainer)
+    - [`view.setZoom(options)`](#viewsetzoomoptions)
+    - [`view.setStartTime(time)`](#viewsetstarttimetime)
   - [Zoom API](#zoom-api)
-    - [instance.zoom.zoomIn()](#instancezoomzoomin)
-    - [instance.zoom.zoomOut()](#instancezoomzoomout)
-    - [instance.zoom.setZoom()](#instancezoomsetzoomindex)
-    - [instance.zoom.getZoom()](#instancezoomgetzoom)
+    - [`instance.zoom.zoomOut()`](#instancezoomzoomout)
+    - [`instance.zoom.zoomIn()`](#instancezoomzoomin)
+    - [`instance.zoom.setZoom(index)`](#instancezoomsetzoomindex)
+    - [`instance.zoom.getZoom()`](#instancezoomgetzoom)
   - [Segments API](#segments-api)
-    - [instance.segments.add()](#instancesegmentsaddsegment)
-    - [instance.segments.getSegments()](#instancesegmentsgetsegments)
-    - [instance.segments.getSegment()](#instancesegmentsgetsegmentid)
-    - [instance.segments.removeByTime()](#instancesegmentsremovebytimestarttime-endtime)
-    - [instance.segments.removeById()](#instancesegmentsremovebyidsegmentid)
-    - [instance.segments.removeAll()](#instancesegmentsremoveall)
+    - [`instance.segments.add({ startTime, endTime, editable, color, labelText, id[, ...] })`](#instancesegmentsadd-starttime-endtime-editable-color-labeltext-id--)
+    - [`instance.segments.add(segment[])`](#instancesegmentsaddsegment)
+    - [`instance.segments.getSegments()`](#instancesegmentsgetsegments)
+    - [`instance.segments.getSegment(id)`](#instancesegmentsgetsegmentid)
+    - [`instance.segments.removeByTime(startTime[, endTime])`](#instancesegmentsremovebytimestarttime-endtime)
+    - [`instance.segments.removeById(segmentId)`](#instancesegmentsremovebyidsegmentid)
+    - [`instance.segments.removeAll()`](#instancesegmentsremoveall)
   - [Segment API](#segment-api)
-    - [segment.update()](#segmentupdatestarttime-endtime-labeltext-color-editable)
+    - [`segment.update({ startTime, endTime, labelText, color, editable[, ...] })`](#segmentupdate-starttime-endtime-labeltext-color-editable--)
   - [Points API](#points-api)
-    - [instance.points.add()](#instancepointsaddpoint)
-    - [instance.points.getPoints()](#instancepointsgetpoints)
-    - [instance.points.getPoint()](#instancepointsgetpointid)
-    - [instance.points.removeByTime()](#instancepointsremovebytimetime)
-    - [instance.points.removeById()](#instancepointsremovebyidpointid)
-    - [instance.points.removeAll()](#instancepointsremoveall)
+    - [`instance.points.add({ time, editable, color, labelText, id[, ...] })`](#instancepointsadd-time-editable-color-labeltext-id--)
+    - [`instance.points.add(point[])`](#instancepointsaddpoint)
+    - [`instance.points.getPoints()`](#instancepointsgetpoints)
+    - [`instance.points.getPoint(id)`](#instancepointsgetpointid)
+    - [`instance.points.removeByTime(time)`](#instancepointsremovebytimetime)
+    - [`instance.points.removeById(pointId)`](#instancepointsremovebyidpointid)
+    - [`instance.points.removeAll()`](#instancepointsremoveall)
   - [Point API](#point-api)
-    - [point.update()](#pointupdatetime-labeltext-color-editable)
+    - [`point.update({ time, labelText, color, editable[, ...] })`](#pointupdate-time-labeltext-color-editable--)
+  - [Cue events](#cue-events)
   - [Events](#events)
-    - [instance.on()](#instanceonevent-callback)
-    - [instance.off()](#instanceoffevent-callback)
+    - [`instance.on(event, callback)`](#instanceonevent-callback)
+      - [Initialization](#initialization-1)
+      - [Player](#player)
+      - [Views](#views)
+      - [Waveforms](#waveforms)
+      - [Segments](#segments)
+      - [Points](#points)
+      - [Cue Events](#cue-events-1)
+    - [`instance.off(event, callback)`](#instanceoffevent-callback)
   - [Destruction](#destruction)
-    - [instance.destroy()](#instancedestroy)
+    - [`instance.destroy()`](#instancedestroy)
 - [Building Peaks.js](#building-peaksjs)
+  - [Prerequisites](#prerequisites)
+  - [Building](#building)
 - [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
 - [Credits](#credits)
+- [Copyright](#copyright)
 
 # Installation
 
@@ -380,6 +395,9 @@ var options = {
   // that the overviewHighlight takes up
   overviewHighlightOffset: 11,
 
+  // if true the playhead will be scrolled to the center of view 
+  viewScrollCenter: false,
+  
   // Color for segments on the waveform
   segmentColor: 'rgba(255, 161, 39, 1)',
 
@@ -391,6 +409,9 @@ var options = {
 
   // Precision of time label of play head and point/segment markers
   timeLabelPrecision: 2,
+
+  /** offset's amounts in seconds to apply to time labels */
+  timeLabelOffset: 0,
 
   // Show current time next to the play head
   // (zoom view only)
@@ -713,6 +734,17 @@ The initial setting is `2`, for both zoomable and overview waveform views. This 
 ```js
 const view = instance.views.getView('zoomview');
 view.setTimeLabelPrecision(3); // Displays time of playhead/marker as hh:mm:ss.sss
+```
+
+### `view.setTimeLabelOffset(time)`
+
+Add offset to view's time labels even axis and palyhead .
+
+The initial setting is `0`, for both zoomable and overview waveform views. This is controlled by the `TimeLabelOffset` configuration option in both views.
+
+```js
+const view = instance.views.getView('zoomview');
+view.setTimeLabelOffset(300); // add 300 seconds to time labels 
 ```
 
 ### `view.enableAutoScroll(enable)`

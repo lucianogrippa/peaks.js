@@ -53,7 +53,7 @@ define([
    * @param {Object} opts Configuration options
    */
 
-  function Peaks() {
+  window.Peaks = function () {
     EventEmitter.call(this);
 
     this.options = {
@@ -178,7 +178,8 @@ define([
        * that the overviewHighlight takes up
        */
       overviewHighlightOffset: 11,
-
+      
+      viewScrollCenter: false,
       /**
        * Random colour per segment (overrides segmentColor)
        */

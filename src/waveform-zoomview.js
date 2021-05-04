@@ -6,28 +6,29 @@
  * @module waveform-zoomview
  */
 define([
-  './mouse-drag-handler',
-  './playhead-layer',
-  './points-layer',
-  './segments-layer',
-  './waveform-axis',
-  './waveform-shape',
-   './animated-zoom-adapter',
-  './static-zoom-adapter',
-  './utils',
-  'konva'
-], function(
-    MouseDragHandler,
-    PlayheadLayer,
-    PointsLayer,
-    SegmentsLayer,
-    WaveformAxis,
-    WaveformShape,
-    AnimatedZoomAdapter,
-    StaticZoomAdapter,
-    Utils,
-    Konva) {
-  'use strict';
+  "./mouse-drag-handler",
+  "./playhead-layer",
+  "./points-layer",
+  "./segments-layer",
+  "./waveform-axis",
+  "./waveform-shape",
+  "./animated-zoom-adapter",
+  "./static-zoom-adapter",
+  "./utils",
+  "konva",
+], function (
+  MouseDragHandler,
+  PlayheadLayer,
+  PointsLayer,
+  SegmentsLayer,
+  WaveformAxis,
+  WaveformShape,
+  AnimatedZoomAdapter,
+  StaticZoomAdapter,
+  Utils,
+  Konva
+) {
+  "use strict";
 
   /**
    * Creates a zoomable waveform view.
@@ -43,6 +44,19 @@ define([
   function WaveformZoomView(waveformData, container, peaks) {
     var self = this;
 
+    window._requestAnimationFrame =
+      window.requestAnimationFrame ||
+      window.mozRequestAnimationFrame ||
+      window.webkitRequestAnimationFrame ||
+      window.msRequestAnimationFrame;
+
+    window._cancelAnimationFrame =
+      window.cancelAnimationFrame ||
+      window.mozCancelAnimationFrame ||
+      window.webkitCancelAnimationFrame ||
+      window.msCancelAnimationFrame;
+    self._rAFHandle = null;
+
     self._originalWaveformData = waveformData;
     self._container = container;
     self._peaks = peaks;
@@ -54,23 +68,24 @@ define([
     self._onWindowResize = self._onWindowResize.bind(self);
     self._onKeyboardLeft = self._onKeyboardLeft.bind(self);
     self._onKeyboardRight = self._onKeyboardRight.bind(self);
-    self._onKeyboardShiftLeft  = self._onKeyboardShiftLeft.bind(self);
+    self._onKeyboardShiftLeft = self._onKeyboardShiftLeft.bind(self);
     self._onKeyboardShiftRight = self._onKeyboardShiftRight.bind(self);
 
     // Register event handlers
-    self._peaks.on('player.timeupdate', self._onTimeUpdate);
-    self._peaks.on('player.play', self._onPlay);
-    self._peaks.on('player.pause', self._onPause);
-    self._peaks.on('window_resize', self._onWindowResize);
-    self._peaks.on('keyboard.left', self._onKeyboardLeft);
-    self._peaks.on('keyboard.right', self._onKeyboardRight);
-    self._peaks.on('keyboard.shift_left', self._onKeyboardShiftLeft);
-    self._peaks.on('keyboard.shift_right', self._onKeyboardShiftRight);
+    self._peaks.on("player.timeupdate", self._onTimeUpdate);
+    self._peaks.on("player.play", self._onPlay);
+    self._peaks.on("player.pause", self._onPause);
+    self._peaks.on("window_resize", self._onWindowResize);
+    self._peaks.on("keyboard.left", self._onKeyboardLeft);
+    self._peaks.on("keyboard.right", self._onKeyboardRight);
+    self._peaks.on("keyboard.shift_left", self._onKeyboardShiftLeft);
+    self._peaks.on("keyboard.shift_right", self._onKeyboardShiftRight);
 
     self._enableAutoScroll = true;
     self._amplitudeScale = 1.0;
     self._timeLabelPrecision = peaks.options.timeLabelPrecision;
     self._timeLabelOffset = peaks.options.timeLabelOffset;
+    self._viewScrollCenter = peaks.options.viewScrollCenter;
 
     self._options = peaks.options;
 
@@ -94,7 +109,7 @@ define([
     self._stage = new Konva.Stage({
       container: container,
       width: self._width,
-      height: self._height
+      height: self._height,
     });
 
     self._waveformLayer = new Konva.FastLayer();
@@ -117,7 +132,7 @@ define([
       playheadTextColor: self._options.playheadTextColor,
       playheadFontFamily: self._options.fontFamily,
       playheadFontSize: self._options.fontSize,
-      playheadFontStyle: self._options.fontStyle
+      playheadFontStyle: self._options.fontStyle,
     });
 
     self._playheadLayer.addToStage(self._stage);
@@ -126,19 +141,29 @@ define([
 
     self._syncPlayhead(time);
 
+
+    self._timer = setInterval(function () {
+      var time = self._peaks.player.getCurrentTime();
+      self.rAFHandle = window.requestAnimationFrame(
+        self._syncPlayhead.bind(self, [time])
+      );
+    }, 410); // 25 frame per seconds
+
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
-      onMouseDown: function(mousePosX) {
+      onMouseDown: function (mousePosX) {
         this.initialFrameOffset = self._frameOffset;
         this.mouseDownX = mousePosX;
       },
 
-      onMouseMove: function(mousePosX) {
+      onMouseMove: function (mousePosX) {
         // Moving the mouse to the left increases the time position of the
         // left-hand edge of the visible waveform.
         var diff = this.mouseDownX - mousePosX;
 
         var newFrameOffset = Utils.clamp(
-          this.initialFrameOffset + diff, 0, self._pixelLength - self._width
+          this.initialFrameOffset + diff,
+          0,
+          self._pixelLength - self._width
         );
 
         if (newFrameOffset !== this.initialFrameOffset) {
@@ -146,7 +171,7 @@ define([
         }
       },
 
-      onMouseUp: function(/* mousePosX */) {
+      onMouseUp: function (/* mousePosX */) {
         // Set playhead position only on click release, when not dragging.
         if (!self._mouseDragHandler.isDragging()) {
           var mouseDownX = Math.floor(this.mouseDownX);
@@ -166,41 +191,39 @@ define([
 
           self._peaks.player.seek(time);
         }
-      }
+      },
     });
 
-    this._stage.on('dblclick', function(event) {
+    this._stage.on("dblclick", function (event) {
       var mousePosX = event.evt.layerX;
 
       var pixelIndex = self._frameOffset + mousePosX;
 
       var time = self.pixelsToTime(pixelIndex);
 
-      self._peaks.emit('zoomview.dblclick', time);
+      self._peaks.emit("zoomview.dblclick", time);
     });
   }
 
-  WaveformZoomView.prototype.getName = function() {
-    return 'zoomview';
+  WaveformZoomView.prototype.getName = function () {
+    return "zoomview";
   };
 
-  WaveformZoomView.prototype._onTimeUpdate = function(time) {
+  WaveformZoomView.prototype._onTimeUpdate = function (time) {
     if (this._mouseDragHandler.isDragging()) {
       return;
     }
-
-    this._syncPlayhead(time);
   };
 
-  WaveformZoomView.prototype._onPlay = function(time) {
+  WaveformZoomView.prototype._onPlay = function (time) {
     this._playheadLayer.updatePlayheadTime(time);
   };
 
-  WaveformZoomView.prototype._onPause = function(time) {
+  WaveformZoomView.prototype._onPause = function (time) {
     this._playheadLayer.stop(time);
   };
 
-  WaveformZoomView.prototype._onWindowResize = function() {
+  WaveformZoomView.prototype._onWindowResize = function () {
     var self = this;
 
     var width = self._container.clientWidth;
@@ -209,8 +232,7 @@ define([
       self._width = width;
       self._stage.width(width);
       self._updateWaveform(self._frameOffset);
-    }
-    else {
+    } else {
       if (self._resizeTimeoutId) {
         clearTimeout(self._resizeTimeoutId);
         self._resizeTimeoutId = null;
@@ -221,7 +243,7 @@ define([
         self._width = width;
         self._stage.width(width);
 
-        self._resizeTimeoutId = setTimeout(function() {
+        self._resizeTimeoutId = setTimeout(function () {
           self._width = width;
           self._data = self._originalWaveformData.resample(width);
           self._stage.width(width);
@@ -232,41 +254,40 @@ define([
     }
   };
 
-  WaveformZoomView.prototype._onKeyboardLeft = function() {
+  WaveformZoomView.prototype._onKeyboardLeft = function () {
     this._keyboardScroll(-1, false);
   };
 
-  WaveformZoomView.prototype._onKeyboardRight = function() {
+  WaveformZoomView.prototype._onKeyboardRight = function () {
     this._keyboardScroll(1, false);
   };
 
-  WaveformZoomView.prototype._onKeyboardShiftLeft = function() {
+  WaveformZoomView.prototype._onKeyboardShiftLeft = function () {
     this._keyboardScroll(-1, true);
   };
 
-  WaveformZoomView.prototype._onKeyboardShiftRight = function() {
+  WaveformZoomView.prototype._onKeyboardShiftRight = function () {
     this._keyboardScroll(1, true);
   };
 
-  WaveformZoomView.prototype._keyboardScroll = function(direction, large) {
+  WaveformZoomView.prototype._keyboardScroll = function (direction, large) {
     var increment;
 
     if (large) {
       increment = direction * this._width;
-    }
-    else {
+    } else {
       increment = direction * this.timeToPixels(this._options.nudgeIncrement);
     }
 
     this._updateWaveform(this._frameOffset + increment);
   };
 
-  WaveformZoomView.prototype.setWaveformData = function(waveformData) {
+  WaveformZoomView.prototype.setWaveformData = function (waveformData) {
     this._originalWaveformData = waveformData;
     // Don't update the UI here, call setZoom().
   };
 
-  WaveformZoomView.prototype._syncPlayhead = function(time) {
+  WaveformZoomView.prototype._syncPlayhead = function (time) {
     this._playheadLayer.updatePlayheadTime(time);
 
     if (this._enableAutoScroll) {
@@ -277,17 +298,26 @@ define([
       // TODO: move this code to animation function?
       // TODO: don't scroll if user has positioned view manually (e.g., using
       // the keyboard)
-      var endThreshold = this._frameOffset - this._width/2;
+      var offset = this._viewScrollCenter
+        ? this._width / 2
+        : -1 * this._width - 100;
+      var endThreshold = this._frameOffset - offset;
 
       if (pixelIndex >= endThreshold || pixelIndex < this._frameOffset) {
         // Put the playhead at 100 pixels from the left edge
-        this._frameOffset = pixelIndex - this._width/2;
+        this._frameOffset =
+          pixelIndex - (this._viewScrollCenter ? offset : 100);
 
         if (this._frameOffset < 0) {
           this._frameOffset = 0;
         }
 
         this._updateWaveform(this._frameOffset);
+
+        var time = this._peaks.player.getCurrentTime();
+        this.rAFHandle = window.requestAnimationFrame(
+          this._syncPlayhead.bind(this, [time])
+        );
       }
     }
   };
@@ -298,16 +328,19 @@ define([
    * @param {Number} scale The new zoom level, in samples per pixel.
    */
 
-  WaveformZoomView.prototype._getScale = function(duration) {
-    return duration * this._data.sample_rate / this._width;
+  WaveformZoomView.prototype._getScale = function (duration) {
+    return (duration * this._data.sample_rate) / this._width;
   };
 
   function isAutoScale(options) {
-    return ((Utils.objectHasProperty(options, 'scale') && options.scale === 'auto') ||
-            (Utils.objectHasProperty(options, 'seconds') && options.seconds === 'auto'));
+    return (
+      (Utils.objectHasProperty(options, "scale") && options.scale === "auto") ||
+      (Utils.objectHasProperty(options, "seconds") &&
+        options.seconds === "auto")
+    );
   }
 
-  WaveformZoomView.prototype.setZoom = function(options) {
+  WaveformZoomView.prototype.setZoom = function (options) {
     var scale;
 
     if (isAutoScale(options)) {
@@ -320,13 +353,11 @@ define([
       this._zoomLevelAuto = true;
       this._zoomLevelSeconds = null;
       scale = this._getScale(seconds);
-    }
-    else {
-      if (Utils.objectHasProperty(options, 'scale')) {
+    } else {
+      if (Utils.objectHasProperty(options, "scale")) {
         this._zoomLevelSeconds = null;
         scale = options.scale;
-      }
-      else if (Utils.objectHasProperty(options, 'seconds')) {
+      } else if (Utils.objectHasProperty(options, "seconds")) {
         if (!Utils.isValidTime(options.seconds)) {
           return false;
         }
@@ -352,8 +383,7 @@ define([
       // Playhead is visible. Change the zoom level while keeping the
       // playhead at the same position in the window.
       apexTime = currentTime;
-    }
-    else {
+    } else {
       // Playhead is not visible. Change the zoom level while keeping the
       // centre of the window at the same position in the waveform.
       playheadOffsetPixels = this._width / 2;
@@ -379,26 +409,26 @@ define([
 
     adapter.start(relativePosition);
 
-    this._peaks.emit('zoom.update', scale, prevScale);
+    this._peaks.emit("zoom.update", scale, prevScale);
 
     return true;
   };
 
-  WaveformZoomView.prototype._resampleData = function(options) {
+  WaveformZoomView.prototype._resampleData = function (options) {
     this._data = this._originalWaveformData.resample(options);
     this._scale = this._data.scale;
     this._pixelLength = this._data.length;
   };
 
-  WaveformZoomView.prototype.getStartTime = function() {
+  WaveformZoomView.prototype.getStartTime = function () {
     return this.pixelsToTime(this._frameOffset);
   };
 
-  WaveformZoomView.prototype.getEndTime = function() {
+  WaveformZoomView.prototype.getEndTime = function () {
     return this.pixelsToTime(this._frameOffset + this._width);
   };
 
-  WaveformZoomView.prototype.setStartTime = function(time) {
+  WaveformZoomView.prototype.setStartTime = function (time) {
     if (time < 0) {
       time = 0;
     }
@@ -417,8 +447,8 @@ define([
    * @returns {Number} Pixel index.
    */
 
-  WaveformZoomView.prototype.timeToPixels = function(time) {
-    return Math.floor(time * this._data.sample_rate / this._data.scale);
+  WaveformZoomView.prototype.timeToPixels = function (time) {
+    return Math.floor((time * this._data.sample_rate) / this._data.scale);
   };
 
   /**
@@ -428,20 +458,25 @@ define([
    * @returns {Number} Time, in seconds.
    */
 
-  WaveformZoomView.prototype.pixelsToTime = function(pixels) {
-    return pixels * this._data.scale / this._data.sample_rate;
+  WaveformZoomView.prototype.pixelsToTime = function (pixels) {
+    return (pixels * this._data.scale) / this._data.sample_rate;
   };
 
   var zoomAdapterMap = {
-    'animated': AnimatedZoomAdapter,
-    'static': StaticZoomAdapter
+    animated: AnimatedZoomAdapter,
+    static: StaticZoomAdapter,
   };
 
-  WaveformZoomView.prototype.createZoomAdapter = function(currentScale, previousScale) {
+  WaveformZoomView.prototype.createZoomAdapter = function (
+    currentScale,
+    previousScale
+  ) {
     var ZoomAdapter = zoomAdapterMap[this._peaks.options.zoomAdapter];
 
     if (!ZoomAdapter) {
-      throw new Error('Invalid zoomAdapter: ' + this._peaks.options.zoomAdapter);
+      throw new Error(
+        "Invalid zoomAdapter: " + this._peaks.options.zoomAdapter
+      );
     }
 
     return ZoomAdapter.create(this, currentScale, previousScale);
@@ -452,7 +487,7 @@ define([
    *   in pixels.
    */
 
-  WaveformZoomView.prototype.getFrameOffset = function() {
+  WaveformZoomView.prototype.getFrameOffset = function () {
     return this._frameOffset;
   };
 
@@ -460,7 +495,7 @@ define([
    * @returns {Number} The width of the view, in pixels.
    */
 
-  WaveformZoomView.prototype.getWidth = function() {
+  WaveformZoomView.prototype.getWidth = function () {
     return this._width;
   };
 
@@ -468,7 +503,7 @@ define([
    * @returns {Number} The height of the view, in pixels.
    */
 
-  WaveformZoomView.prototype.getHeight = function() {
+  WaveformZoomView.prototype.getHeight = function () {
     return this._height;
   };
 
@@ -476,7 +511,7 @@ define([
    * @returns {Number} The media duration, in seconds.
    */
 
-  WaveformZoomView.prototype._getDuration = function() {
+  WaveformZoomView.prototype._getDuration = function () {
     return this._peaks.player.getDuration();
   };
 
@@ -487,9 +522,9 @@ define([
    * @param {Number} scale The new amplitude scale factor
    */
 
-  WaveformZoomView.prototype.setAmplitudeScale = function(scale) {
+  WaveformZoomView.prototype.setAmplitudeScale = function (scale) {
     if (!Utils.isNumber(scale) || !Number.isFinite(scale)) {
-      throw new Error('view.setAmplitudeScale(): Scale must be a valid number');
+      throw new Error("view.setAmplitudeScale(): Scale must be a valid number");
     }
 
     this._amplitudeScale = scale;
@@ -498,7 +533,7 @@ define([
     this._segmentsLayer.draw();
   };
 
-  WaveformZoomView.prototype.getAmplitudeScale = function() {
+  WaveformZoomView.prototype.getAmplitudeScale = function () {
     return this._amplitudeScale;
   };
 
@@ -506,32 +541,32 @@ define([
    * @returns {WaveformData} The view's waveform data.
    */
 
-  WaveformZoomView.prototype.getWaveformData = function() {
+  WaveformZoomView.prototype.getWaveformData = function () {
     return this._data;
   };
 
-  WaveformZoomView.prototype._createWaveform = function() {
+  WaveformZoomView.prototype._createWaveform = function () {
     this._waveformShape = new WaveformShape({
       color: this._options.zoomWaveformColor,
-      view: this
+      view: this,
     });
 
     this._waveformLayer.add(this._waveformShape);
     this._stage.add(this._waveformLayer);
 
-    this._peaks.emit('zoomview.displaying', 0, this.pixelsToTime(this._width));
+    this._peaks.emit("zoomview.displaying", 0, this.pixelsToTime(this._width));
   };
 
-  WaveformZoomView.prototype._createAxisLabels = function() {
+  WaveformZoomView.prototype._createAxisLabels = function () {
     this._axisLayer = new Konva.FastLayer();
 
     this._axis = new WaveformAxis(this, {
-      axisGridlineColor:   this._options.axisGridlineColor,
-      axisLabelColor:      this._options.axisLabelColor,
+      axisGridlineColor: this._options.axisGridlineColor,
+      axisLabelColor: this._options.axisLabelColor,
       axisLabelFontFamily: this._options.fontFamily,
-      axisLabelFontSize:   this._options.fontSize,
-      axisLabelFontStyle:  this._options.fontStyle,
-      timeLabelOffset:     this._timeLabelOffset
+      axisLabelFontSize: this._options.fontSize,
+      axisLabelFontStyle: this._options.fontStyle,
+      timeLabelOffset: this._timeLabelOffset,
     });
     this._axis.setTimeLabelOffset(this._timeLabelOffset);
     this._axis.addToLayer(this._axisLayer);
@@ -543,16 +578,15 @@ define([
    *
    * @param {Number} frameOffset The new frame offset, in pixels.
    */
-  WaveformZoomView.prototype._updateWaveform = function(frameOffset) {
+  WaveformZoomView.prototype._updateWaveform = function (frameOffset) {
     var upperLimit = 0;
-    console.log("frame offset ",frameOffset);
+    console.log("frame offset ", frameOffset);
     this._axis.setTimeLabelOffset(this._timeLabelOffset);
     if (this._pixelLength < this._width) {
       // Total waveform is shorter than viewport, so reset the offset to 0.
       frameOffset = 0;
       upperLimit = this._width;
-    }
-    else {
+    } else {
       // Calculate the very last possible position.
       upperLimit = this._pixelLength - this._width;
     }
@@ -570,49 +604,56 @@ define([
     this._axisLayer.draw();
 
     var frameStartTime = this.pixelsToTime(this._frameOffset);
-    var frameEndTime   = this.pixelsToTime(this._frameOffset + this._width);
+    var frameEndTime = this.pixelsToTime(this._frameOffset + this._width);
 
     this._pointsLayer.updatePoints(frameStartTime, frameEndTime);
     this._segmentsLayer.updateSegments(frameStartTime, frameEndTime);
 
-    this._peaks.emit('zoomview.displaying', frameStartTime, frameEndTime);
+    this._peaks.emit("zoomview.displaying", frameStartTime, frameEndTime);
   };
 
-  WaveformZoomView.prototype.setWaveformColor = function(color) {
+  WaveformZoomView.prototype.setWaveformColor = function (color) {
     this._waveformShape.setWaveformColor(color);
     this._waveformLayer.draw();
   };
 
-  WaveformZoomView.prototype.showPlayheadTime = function(show) {
+  WaveformZoomView.prototype.showPlayheadTime = function (show) {
     this._playheadLayer.showPlayheadTime(show);
   };
 
-  WaveformZoomView.prototype.setTimeLabelPrecision = function(precision) {
+  WaveformZoomView.prototype.setTimeLabelPrecision = function (precision) {
     this._timeLabelPrecision = precision;
     this._playheadLayer.updatePlayheadText();
   };
 
-  WaveformZoomView.prototype.setTimeLabelOffset = function(offset) {
+  WaveformZoomView.prototype.setTimeLabelOffset = function (offset) {
     this._axis.setTimeLabelOffset(offset);
     this._timeLabelOffset = offset;
     this._playheadLayer.updatePlayheadText();
   };
 
-  WaveformZoomView.prototype.formatTime = function(time) {
-    return Utils.formatTime(time, this._timeLabelPrecision, this._timeLabelOffset);
+  WaveformZoomView.prototype.formatTime = function (time) {
+    return Utils.formatTime(
+      time,
+      this._timeLabelPrecision,
+      this._timeLabelOffset
+    );
   };
 
-  WaveformZoomView.prototype.enableAutoScroll = function(enable) {
+  WaveformZoomView.prototype.enableAutoScroll = function (enable) {
     this._enableAutoScroll = enable;
   };
 
-  WaveformZoomView.prototype.enableMarkerEditing = function(enable) {
+  WaveformZoomView.prototype.enableMarkerEditing = function (enable) {
     this._segmentsLayer.enableEditing(enable);
     this._pointsLayer.enableEditing(enable);
   };
 
-  WaveformZoomView.prototype.fitToContainer = function() {
-    if (this._container.clientWidth === 0 && this._container.clientHeight === 0) {
+  WaveformZoomView.prototype.fitToContainer = function () {
+    if (
+      this._container.clientWidth === 0 &&
+      this._container.clientHeight === 0
+    ) {
       return;
     }
 
@@ -628,8 +669,7 @@ define([
       if (this._zoomLevelAuto) {
         resample = true;
         resampleOptions = { width: this._width };
-      }
-      else if (this._zoomLevelSeconds !== null) {
+      } else if (this._zoomLevelSeconds !== null) {
         resample = true;
         resampleOptions = { scale: this._getScale(this._zoomLevelSeconds) };
       }
@@ -638,8 +678,7 @@ define([
         try {
           this._resampleData(resampleOptions);
           updateWaveform = true;
-        }
-        catch (error) {
+        } catch (error) {
           // Ignore, and leave this._data as it was
         }
       }
@@ -687,21 +726,35 @@ define([
     this.seekFrame(this.timeToPixels(time));
   }; */
 
-  WaveformZoomView.prototype.destroy = function() {
+  WaveformZoomView.prototype.destroy = function () {
     if (this._resizeTimeoutId) {
       clearTimeout(this._resizeTimeoutId);
       this._resizeTimeoutId = null;
     }
 
+    if (this.rAFHandle) {
+      window.cancelAnimationFrame(this.rAFHandle);
+      this.rAFHandle = null;
+
+      if (this._timer) {
+        clearInterval(this._timer);
+        this._timer = null;
+      }
+    }
+
+    if (this._timer) {
+      clearInterval(this._timer);
+      this._timer = null;
+    }
     // Unregister event handlers
-    this._peaks.off('player.timeupdate', this._onTimeUpdate);
-    this._peaks.off('player.play', this._onPlay);
-    this._peaks.off('player.pause', this._onPause);
-    this._peaks.off('window_resize', this._onWindowResize);
-    this._peaks.off('keyboard.left', this._onKeyboardLeft);
-    this._peaks.off('keyboard.right', this._onKeyboardRight);
-    this._peaks.off('keyboard.shift_left', this._onKeyboardShiftLeft);
-    this._peaks.off('keyboard.shift_right', this._onKeyboardShiftRight);
+    this._peaks.off("player.timeupdate", this._onTimeUpdate);
+    this._peaks.off("player.play", this._onPlay);
+    this._peaks.off("player.pause", this._onPause);
+    this._peaks.off("window_resize", this._onWindowResize);
+    this._peaks.off("keyboard.left", this._onKeyboardLeft);
+    this._peaks.off("keyboard.right", this._onKeyboardRight);
+    this._peaks.off("keyboard.shift_left", this._onKeyboardShiftLeft);
+    this._peaks.off("keyboard.shift_right", this._onKeyboardShiftRight);
 
     this._playheadLayer.destroy();
     this._segmentsLayer.destroy();
