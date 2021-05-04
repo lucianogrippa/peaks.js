@@ -738,7 +738,7 @@ view.setTimeLabelPrecision(3); // Displays time of playhead/marker as hh:mm:ss.s
 
 ### `view.setTimeLabelOffset(time)`
 
-Add offset to view's time labels even axis and palyhead .
+Add offset to the view's time labels, even axis and palyhead.
 
 The initial setting is `0`, for both zoomable and overview waveform views. This is controlled by the `TimeLabelOffset` configuration option in both views.
 
