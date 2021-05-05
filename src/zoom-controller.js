@@ -74,7 +74,7 @@ define([], function() {
     if (!zoomview) {
       return;
     }
-
+    
     zoomview.setZoom({ scale: this._zoomLevels[zoomLevelIndex] });
   };
 

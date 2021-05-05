@@ -56,7 +56,7 @@ define([
       window.webkitCancelAnimationFrame ||
       window.msCancelAnimationFrame;
     self._rAFHandle = null;
-
+    self._isPlaying = false;
     self._originalWaveformData = waveformData;
     self._container = container;
     self._peaks = peaks;
@@ -139,7 +139,7 @@ define([
 
     var time = self._peaks.player.getCurrentTime();
 
-    self._syncPlayhead(time);
+    self._startSyncPlayhead(time);
 
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
       onMouseDown: function (mousePosX) {
@@ -206,19 +206,40 @@ define([
       return;
     }
 
-    if(self._syncPlayhead){
-      this.rAFHandle = window.requestAnimationFrame(
-        this._syncPlayhead.bind(this, [time])
-      );
+    if(!this.viewScrollCenter){
+      this._startSyncPlayhead(time);
     }
   };
 
+  WaveformZoomView.prototype._startSyncPlayhead = function(time) {
+    this.rAFHandle = window.requestAnimationFrame(
+      this._syncPlayhead.bind(this, [time])
+    );
+	}
+	
+	WaveformZoomView.prototype._pauseSyncPlayhead = function() {
+    if(this.rAFHandle){
+			cancelAnimationFrame(this.rAFHandle);
+    }
+	};
+
   WaveformZoomView.prototype._onPlay = function (time) {
+    console.log('zoom views --> player.play');
+    if(!this._isPlaying){
+      this._startSyncPlayhead(time);
+    }
+    this._isPlaying=true;
+
     this._playheadLayer.updatePlayheadTime(time);
   };
 
   WaveformZoomView.prototype._onPause = function (time) {
+    console.log('zoom views --> player.pause');
     this._playheadLayer.stop(time);
+    if(this._isPlaying){
+      this._pauseSyncPlayhead();
+    }
+    this._isPlaying = false;
   };
 
   WaveformZoomView.prototype._onWindowResize = function () {
@@ -292,9 +313,7 @@ define([
       // Check for the playhead reaching the right-hand side of the window.
 
       var pixelIndex = this.timeToPixels(time);
-
-      // TODO: don't scroll if user has positioned view manually (e.g., using
-      // the keyboard)
+      
       var offset = this._viewScrollCenter
         ? this._width / 2
         : -1 * this._width - 100;
@@ -368,7 +387,10 @@ define([
 
     if (scale < this._originalWaveformData.scale) {
       // eslint-disable-next-line max-len
-      // this._peaks.logger('peaks.zoomview.setZoom(): zoom level must be at least ' + this._originalWaveformData.scale);
+      this._peaks.logger(
+        "peaks.zoomview.setZoom(): zoom level must be at least " +
+          this._originalWaveformData.scale
+      );
       scale = this._originalWaveformData.scale;
     }
 
@@ -402,13 +424,16 @@ define([
     // Update the playhead position after zooming.
     this._playheadLayer.updatePlayheadTime(currentTime);
 
-    currentScale = currentScale != undefined ? currentScale: 256;
-    var adapter = this.createZoomAdapter(currentScale, previousScale);
+    // var adapter = this.createZoomAdapter(currentScale, previousScale);
 
-    adapter.start(relativePosition);
+    // adapter.start(relativePosition);
 
     this._peaks.emit("zoom.update", scale, prevScale);
 
+
+    var time = this.peaks.player.getCurrentTime();
+    this._startSyncPlayhead(time);
+    
     return true;
   };
 
@@ -578,7 +603,7 @@ define([
    */
   WaveformZoomView.prototype._updateWaveform = function (frameOffset) {
     var upperLimit = 0;
-   // console.log("frame offset ", frameOffset);
+    // console.log("frame offset ", frameOffset);
     this._axis.setTimeLabelOffset(this._timeLabelOffset);
     if (this._pixelLength < this._width) {
       // Total waveform is shorter than viewport, so reset the offset to 0.
@@ -734,7 +759,7 @@ define([
       window.cancelAnimationFrame(this.rAFHandle);
       this.rAFHandle = null;
     }
-    
+
     // Unregister event handlers
     this._peaks.off("player.timeupdate", this._onTimeUpdate);
     this._peaks.off("player.play", this._onPlay);
