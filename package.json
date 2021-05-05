@@ -47,6 +47,9 @@
     "prepack": "npm run build"
   },
   "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/preset-env": "^7.14.1",
+    "babel-loader": "^8.2.2",
     "browserify": "~17.0.0",
     "browserify-istanbul": "~3.0.1",
     "chai": "~4.2.0",
@@ -72,10 +75,11 @@
     "sinon": "~9.2.4",
     "sinon-chai": "~3.5.0",
     "watchify": "~4.0.0",
-    "webpack": "^5.35.0",
+    "webpack": "^5.36.2",
     "webpack-cli": "^4.6.0"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
     "colors.css": "~3.0.0",
     "eventemitter3": "~4.0.7",
     "konva": "^7.2.5",

@@ -141,14 +141,6 @@ define([
 
     self._syncPlayhead(time);
 
-
-    self._timer = setInterval(function () {
-      var time = self._peaks.player.getCurrentTime();
-      self.rAFHandle = window.requestAnimationFrame(
-        self._syncPlayhead.bind(self, [time])
-      );
-    }, 410); // 25 frame per seconds
-
     self._mouseDragHandler = new MouseDragHandler(self._stage, {
       onMouseDown: function (mousePosX) {
         this.initialFrameOffset = self._frameOffset;
@@ -212,6 +204,12 @@ define([
   WaveformZoomView.prototype._onTimeUpdate = function (time) {
     if (this._mouseDragHandler.isDragging()) {
       return;
+    }
+
+    if(self._syncPlayhead){
+      this.rAFHandle = window.requestAnimationFrame(
+        this._syncPlayhead.bind(this, [time])
+      );
     }
   };
 
@@ -295,7 +293,6 @@ define([
 
       var pixelIndex = this.timeToPixels(time);
 
-      // TODO: move this code to animation function?
       // TODO: don't scroll if user has positioned view manually (e.g., using
       // the keyboard)
       var offset = this._viewScrollCenter
@@ -405,6 +402,7 @@ define([
     // Update the playhead position after zooming.
     this._playheadLayer.updatePlayheadTime(currentTime);
 
+    currentScale = currentScale != undefined ? currentScale: 256;
     var adapter = this.createZoomAdapter(currentScale, previousScale);
 
     adapter.start(relativePosition);
@@ -580,7 +578,7 @@ define([
    */
   WaveformZoomView.prototype._updateWaveform = function (frameOffset) {
     var upperLimit = 0;
-    console.log("frame offset ", frameOffset);
+   // console.log("frame offset ", frameOffset);
     this._axis.setTimeLabelOffset(this._timeLabelOffset);
     if (this._pixelLength < this._width) {
       // Total waveform is shorter than viewport, so reset the offset to 0.
@@ -735,17 +733,8 @@ define([
     if (this.rAFHandle) {
       window.cancelAnimationFrame(this.rAFHandle);
       this.rAFHandle = null;
-
-      if (this._timer) {
-        clearInterval(this._timer);
-        this._timer = null;
-      }
     }
-
-    if (this._timer) {
-      clearInterval(this._timer);
-      this._timer = null;
-    }
+    
     // Unregister event handlers
     this._peaks.off("player.timeupdate", this._onTimeUpdate);
     this._peaks.off("player.play", this._onPlay);
