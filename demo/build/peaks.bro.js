@@ -23960,8 +23960,6 @@ module.exports = function (MouseDragHandler, PlayheadLayer, PointsLayer, Segment
     'use strict';
     function WaveformZoomView(waveformData, container, peaks) {
         var self = this;
-        window._requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-        window._cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame;
         self._rAFHandle = null;
         self._isPlaying = false;
         self._originalWaveformData = waveformData;
@@ -23970,6 +23968,7 @@ module.exports = function (MouseDragHandler, PlayheadLayer, PointsLayer, Segment
         self._onTimeUpdate = self._onTimeUpdate.bind(self);
         self._onPlay = self._onPlay.bind(self);
         self._onPause = self._onPause.bind(self);
+        self._onSeek = self._onSeek.bind(self);
         self._onWindowResize = self._onWindowResize.bind(self);
         self._onKeyboardLeft = self._onKeyboardLeft.bind(self);
         self._onKeyboardRight = self._onKeyboardRight.bind(self);
@@ -24022,8 +24021,7 @@ module.exports = function (MouseDragHandler, PlayheadLayer, PointsLayer, Segment
             playheadFontStyle: self._options.fontStyle
         });
         self._playheadLayer.addToStage(self._stage);
-        var time = self._peaks.player.getCurrentTime();
-        self._startSyncPlayhead(time);
+        this._rAFHandle = setInterval(self._startSyncPlayhead.bind(this), 25);
         self._mouseDragHandler = new MouseDragHandler(self._stage, {
             onMouseDown: function (mousePosX) {
                 this.initialFrameOffset = self._frameOffset;
@@ -24064,22 +24062,21 @@ module.exports = function (MouseDragHandler, PlayheadLayer, PointsLayer, Segment
         if (this._mouseDragHandler.isDragging()) {
             return;
         }
-        if (!this.viewScrollCenter) {
-            this._startSyncPlayhead(time);
-        }
     };
-    WaveformZoomView.prototype._startSyncPlayhead = function (time) {
-        this.rAFHandle = window.requestAnimationFrame(this._syncPlayhead.bind(this, [time]));
+    WaveformZoomView.prototype._startSyncPlayhead = function () {
+        var time = this._peaks.player.getCurrentTime();
+        this._syncPlayhead(time);
     };
     WaveformZoomView.prototype._pauseSyncPlayhead = function () {
         if (this.rAFHandle) {
-            cancelAnimationFrame(this.rAFHandle);
+            clearTimeout(this.rAFHandle);
+            this.rAFHandle = null;
         }
     };
     WaveformZoomView.prototype._onPlay = function (time) {
         console.log('zoom views --> player.play');
         if (!this._isPlaying) {
-            this._startSyncPlayhead(time);
+            this._startSyncPlayhead();
         }
         this._isPlaying = true;
         this._playheadLayer.updatePlayheadTime(time);
@@ -24087,10 +24084,10 @@ module.exports = function (MouseDragHandler, PlayheadLayer, PointsLayer, Segment
     WaveformZoomView.prototype._onPause = function (time) {
         console.log('zoom views --> player.pause');
         this._playheadLayer.stop(time);
-        if (this._isPlaying) {
-            this._pauseSyncPlayhead();
-        }
         this._isPlaying = false;
+    };
+    WaveformZoomView.prototype._onSeek = function (time) {
+        console.log('zoom views --> player.seek');
     };
     WaveformZoomView.prototype._onWindowResize = function () {
         var self = this;
@@ -24152,8 +24149,6 @@ module.exports = function (MouseDragHandler, PlayheadLayer, PointsLayer, Segment
                     this._frameOffset = 0;
                 }
                 this._updateWaveform(this._frameOffset);
-                var time = this._peaks.player.getCurrentTime();
-                this.rAFHandle = window.requestAnimationFrame(this._syncPlayhead.bind(this, [time]));
             }
         }
     };
@@ -24207,8 +24202,6 @@ module.exports = function (MouseDragHandler, PlayheadLayer, PointsLayer, Segment
         this._playheadLayer.zoomLevelChanged();
         this._playheadLayer.updatePlayheadTime(currentTime);
         this._peaks.emit('zoom.update', scale, prevScale);
-        var time = this.peaks.player.getCurrentTime();
-        this._startSyncPlayhead(time);
         return true;
     };
     WaveformZoomView.prototype._resampleData = function (options) {
@@ -24385,13 +24378,15 @@ module.exports = function (MouseDragHandler, PlayheadLayer, PointsLayer, Segment
             clearTimeout(this._resizeTimeoutId);
             this._resizeTimeoutId = null;
         }
-        if (this.rAFHandle) {
-            window.cancelAnimationFrame(this.rAFHandle);
-            this.rAFHandle = null;
+        if (this._rAFHandle) {
+            clearTimeout(this._rAFHandle);
+            this._rAFHandle = null;
+            this._refreshCount = 0;
         }
         this._peaks.off('player.timeupdate', this._onTimeUpdate);
         this._peaks.off('player.play', this._onPlay);
         this._peaks.off('player.pause', this._onPause);
+        this._peaks.off('player.seeked', this._onSeek);
         this._peaks.off('window_resize', this._onWindowResize);
         this._peaks.off('keyboard.left', this._onKeyboardLeft);
         this._peaks.off('keyboard.right', this._onKeyboardRight);
