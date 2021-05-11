@@ -34,9 +34,10 @@
   "scripts": {
     "build:browserify": "browserify -d -e ./src/main.js -t deamdify -s peaks | exorcist ./build/peaks.bro.js.map | derequire - > ./build/peaks.bro.js",
     "build:dev": "npm run build:browserify && set NODE_ENV=development && webpack && npm run postbuild",
-    "build": "set NODE_ENV=production && webpack",
+    "build": "SET \"NODE_ENV=production\" && npm run build:browserify && set NODE_ENV=development && webpack",
     "build:demo": "set NODE_ENV=development && webpack && npm run postbuild",
-    "postbuild": "copyfiles peaks.js.d.ts ./build/peaks.js ./build/peaks.js.map ./build/peaks.bro.js ./build/peaks.bro.js.map ./demo &&  copyfiles  peaks.js.d.ts ./build/peaks.js ./build/peaks.js.map ../audiocut-editor-player/editor-source/libs/peaks.js/",
+    "postbuild": "copyfiles ./peaks.js.d.ts ./build/peaks.js ./build/peaks.js.map ./build/peaks.bro.js ./build/peaks.bro.js.map ./demo",
+    "copy:editor": "copyfiles  peaks.js.d.ts ./build/peaks.js ./build/peaks.js.map ../audiocut-editor-player/editor-source/angular-audioeditor/libs/peaks.js/build",
     "doc": "jsdoc --private --destination docs --recurse src",
     "lint": "eslint --fix src/*.js test/**/*.js test/*.js karma.conf.js",
     "pretest": "npm run build",
