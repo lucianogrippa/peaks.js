@@ -8,6 +8,7 @@ console.log("env.NODE_ENV is " + env.NODE_ENV);
 let  mode = !!env.NODE_ENV ? env.NODE_ENV.trim(): 'development';
 
 const devMode = mode === 'development';
+const LiveReloadPlugin = require('webpack-livereload-plugin');
 
 console.log("mode is ",mode," sourcemap ",devMode);
 console.log(mode);
@@ -32,5 +33,8 @@ module.exports = {
         }
       }
     ]
-  }  
+  },
+  plugins: [
+    new LiveReloadPlugin()
+  ] 
 };
