@@ -309,8 +309,9 @@ define([
     if (this._playheadText) {
       var time = this._player.getCurrentTime();
       var text = this._view.formatTime(time);
-
+      this._playheadText.fill(this._playheadTextColor);
       this._playheadText.setText(text);
+      
     }
 
     this._playheadLayer.draw();

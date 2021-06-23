@@ -64,6 +64,8 @@ You can read more about the project and see a demo [here](https://waveform.proto
   - [View API](#view-api)
     - [`view.setAmplitudeScale(scale)`](#viewsetamplitudescalescale)
     - [`view.setWaveformColor(color)`](#viewsetwaveformcolorcolor)
+    - [`view.setWaveZoomTextColor(color)`](#viewsetWaveZoomTextColor)
+    - [`view.setWaveZoomPlayheadColor(color)`](#viewsetWaveZoomPlayheadColor)
     - [`view.showPlayheadTime(show)`](#viewshowplayheadtimeshow)
     - [`view.setTimeLabelPrecision(precision)`](#viewsettimelabelprecisionprecision)
     - [`view.setTimeLabelOffset(time)`](#viewsettimelabeloffsettime)
@@ -712,6 +714,29 @@ view.setWaveformColor({
   linearGradientEnd: 30,
   linearGradientColorStops: ['hsl(120, 78%, 26%)', 'hsl(120, 78%, 10%)']
 });
+```
+
+
+### `view.setWaveZoomTextColor(color)`
+
+Sets the wave-zoom text colors, as a string containing any valid [CSS color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value).
+
+The initial color is controlled by the `axisLabelColor` and `axisGridlineColor` configuration options.
+
+```js
+const view = instance.views.getView('zoomview');
+view.setWaveZoomTextColor('#800080'); // Purple
+```
+
+### `view.setWaveZoomPlayheadColor(color)`
+
+Sets the wave-zoom Playhead colors, as a string containing any valid [CSS color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value).
+
+The initial color is controlled by the `playheadTextColor` and `playheadColor` configuration options.
+
+```js
+const view = instance.views.getView('zoomview');
+view.setWaveZoomPlayheadColor('#800080'); // Purple
 ```
 
 ### `view.showPlayheadTime(show)`

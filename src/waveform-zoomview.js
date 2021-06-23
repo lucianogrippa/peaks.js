@@ -632,6 +632,17 @@ define([
     this._waveformLayer.draw();
   };
 
+  WaveformZoomView.prototype.setWaveZoomTextColor = function(color) {
+      this._axis._axisLabelColor = color;
+      this._axis._axisGridlineColor = color;
+      this._updateWaveform(this._frameOffset);
+  };
+  WaveformZoomView.prototype.setWaveZoomPlayheadColor = function(color) {
+      this._playheadLayer._playheadLine.attrs.stroke = color;
+      this._playheadLayer._playheadText.attrs.fill = color;
+      this._updateWaveform(this._frameOffset);
+  };
+
   WaveformZoomView.prototype.showPlayheadTime = function (show) {
     this._playheadLayer.showPlayheadTime(show);
   };
