@@ -318,6 +318,8 @@ declare module 'peaks.js' {
   interface WaveformView {
     setAmplitudeScale: (scale: number) => void;
     setWaveformColor: (color: string) => void;
+    setWaveZoomTextColor: (color: string) => void;
+    setWaveZoomPlayheadColor: (color: string) => void;
     showPlayheadTime: (show: boolean) => void;
     setTimeLabelPrecision: (precision: number) => void;
     setTimeLabelOffset: (time:number) => void;
